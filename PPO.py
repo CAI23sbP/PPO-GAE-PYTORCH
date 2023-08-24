@@ -294,15 +294,11 @@ class PPO:
 
         seg_done = seg["done"]
         vpred = np.append(seg["v_pred"], last_state_v_pred) # currently we add 0
-
         gae_lam = torch.empty(truncation_size, dtype = float)
         seg_rewards = seg["rew"]
         last_gae_lam = 0
         for t in reversed(range(truncation_size)):
-            if seg_done[t]:
-                non_terminal = 0 
-            else:
-                non_terminal = 1                   
+            non_terminal = 1 - seg_done[t]
             delta = seg_rewards[t] + self.gamma * vpred[t + 1] * non_terminal - vpred[t]
             gae_lam[t] = delta + self.gamma * self.lmda * non_terminal * last_gae_lam
             last_gae_lam = gae_lam[t]
